@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skyscrapers</title>
+  <script src="code.js"></script>
+ <style>
+    .center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #table {
+      display: none;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+      min-width: 30px;
+      height: 30px;
+      cursor: pointer;
+    }
+    td:focus {
+      outline: none;
+      background-color: #7fc7fe;
+    }
+    .borderless {
+      border: none;
+      background-color: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+  <div class="center">
+    <p>Enter the size of your puzzle (e.g., 4 for 4x4):</p>
+    <input id="shape" type="number" min="1" />
+    <button onclick="generateShape()">Generate Puzzle</button>
+    <table id="table"></table>
+    <button id="puzzleSubmit" style="display: none;" onclick="validate()">Submit Puzzle</button>
+    <button id="help" style="display: none;" onclick="solveSkyscraper()">Help me</button>
+  </div>
+</body>
+</html>
