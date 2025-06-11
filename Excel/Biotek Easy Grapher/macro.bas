@@ -1,4 +1,3 @@
-Attribute VB_Name = "PlotData"
 Sub PlotData()
 '
 ' PlotData Macro
@@ -88,9 +87,14 @@ Sub PlotData()
         Range(cell, Cells(cell.Row + reads, cell.Column)).Cut _
             Destination:=output.Cells(outputRow, destCol)
     Next cell
+
+    ' Delete extra label rows
+    For i = 1 To reads + 2
+        Rows(1).Delete
+    Next i
         
     ' Avg & std dev calc
-    For i = 1 To 12
+    For i = 0 To 11
         Cells(1 + (reads + 2) * i, 11).Value = "Avg"
         Cells(1 + (reads + 2) * i, 12).Value = "Std Dev"
         For j = 1 To reads
@@ -104,7 +108,7 @@ Sub PlotData()
     Next i
     
     ' Graphs
-    For i = 1 To 12
+    For i = 0 To 11
         Set area = Cells(2 + (reads + 2) * i, 14)
         
         Dim chartShape As Shape
@@ -113,27 +117,39 @@ Sub PlotData()
         Set graph = chartShape.Chart
         
         ' Plot avg
-        graph.SetSourceData Source:=Range(Cells(2 + (reads + 2) * i, 11), Cells(2 + (reads + 2) * i + reads, 11))
+        With graph.SeriesCollection.NewSeries
+            .XValues = output.Range(Cells(2 + (reads + 2) * i, 1), Cells(2 + (reads + 2) * i + reads - 1, 1)) ' X-axis
+            .Values = output.Range(Cells(2 + (reads + 2) * i, 11), Cells(2 + (reads + 2) * i + reads - 1, 11)) ' Y-axis
+            .Name = "Data Points"
+        End With
+
+        ' Set axis titles
+        graph.HasTitle = True
+        graph.ChartTitle.Text = i + 1
+        graph.Axes(xlCategory).HasTitle = True
+        graph.Axes(xlCategory).AxisTitle.Text = "Time"
+        graph.Axes(xlValue).HasTitle = True
+        graph.Axes(xlValue).AxisTitle.Text = "Absorbance"
         
         ' Position the chart on area
         chartShape.Top = area.Top
         chartShape.Left = area.Left
         
-
+        ' Add trendline
         graph.FullSeriesCollection(1).Trendlines.Add Type:=xlLinear, Forward _
             :=0, Backward:=0, DisplayEquation:=1, DisplayRSquared:=1, Name:= _
             "Linear Reg"
-        graph.ChartTitle.Text = i
-        graph.SetElement (msoElementPrimaryCategoryAxisTitleAdjacentToAxis)
-        graph.SetElement (msoElementPrimaryValueAxisTitleAdjacentToAxis)
-        graph.Axes(1).AxisTitle.Text = "Time"
         graph.FullSeriesCollection(1).Trendlines(1).DataLabel.Left = 245
         graph.FullSeriesCollection(1).Trendlines(1).DataLabel.Top = 40
-    Next i
-    
-    ' Delete extra label rows
-    For i = 1 To reads + 2
-        Rows(1).Delete
+
+        With graph
+            ' Loop backward because deleting alters the collection index
+            For j = .SeriesCollection.Count To 1 Step -1
+                If .SeriesCollection(j).Name <> "Data Points" Then
+                    .SeriesCollection(j).Delete
+                End If
+            Next j
+        End With
     Next i
 '
 End Sub
@@ -148,5 +164,3 @@ Function RangeHasBlanks(rng As Range) As Boolean
     Next cell
     RangeHasBlanks = False
 End Function
-
-
